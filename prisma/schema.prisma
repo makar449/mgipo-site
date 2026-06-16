@@ -1,0 +1,426 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  PROCESSED
+  REJECTED
+}
+
+enum LeadPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  ARCHIVED
+}
+
+enum AdminRoleKey {
+  OWNER
+  ADMIN
+  MANAGER
+  EDITOR
+  VIEWER
+}
+
+model AdminRole {
+  id          String       @id @default(cuid())
+  key         AdminRoleKey @unique
+  name        String
+  permissions Json
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  users       AdminUser[]
+}
+
+model AdminUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  isActive     Boolean    @default(true)
+  roleId       String
+  role         AdminRole  @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AdminAuditLog[]
+
+  @@index([roleId])
+  @@index([isActive])
+}
+
+model AdminAuditLog {
+  id          String     @id @default(cuid())
+  action      String
+  entityType  String?
+  entityId    String?
+  actorUserId String?
+  actorEmail  String?
+  ipAddress   String?
+  userAgent   String?
+  payload     Json?
+  createdAt   DateTime   @default(now())
+  actorUser   AdminUser? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@index([createdAt])
+}
+
+model SiteSettings {
+  id             String   @id @default("main")
+  shortName      String
+  fullName       String
+  descriptor     String
+  phone          String
+  email          String
+  address        String
+  workHours      String
+  license        String
+  legalName      String?
+  inn            String?
+  ogrn           String?
+  kpp            String?
+  bank           String?
+  bik            String?
+  account        String?
+  corrAccount    String?
+  primaryBlue    String   @default("#1057d8")
+  background     String   @default("#ffffff")
+  textColor      String   @default("#071527")
+  radius         String   @default("balanced")
+  density        String   @default("balanced")
+  draftPayload   Json?
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model PageContent {
+  id            String        @id @default(cuid())
+  pageKey       String        @unique
+  slug          String        @unique
+  title         String
+  description   String
+  h1            String
+  blocks        Json
+  status        PublishStatus @default(PUBLISHED)
+  draftBlocks   Json?
+  version       Int           @default(1)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  seoMeta       SeoMeta?
+
+  @@index([status])
+}
+
+model SeoMeta {
+  id          String       @id @default(cuid())
+  pageKey     String?
+  title       String
+  description String
+  keywords    String?
+  canonical   String?
+  ogTitle     String?
+  ogDescription String?
+  ogImage     String?
+  noIndex     Boolean      @default(false)
+  pageId      String?      @unique
+  page        PageContent? @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  serviceId   String?      @unique
+  service     Service?     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  categoryId  String?      @unique
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([pageKey])
+  @@index([noIndex])
+}
+
+model NavigationItem {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  href      String
+  label     String
+  sortOrder Int      @default(0)
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([visible, sortOrder])
+}
+
+model FooterColumn {
+  id        String       @id @default(cuid())
+  key       String       @unique
+  title     String
+  sortOrder Int          @default(0)
+  visible   Boolean      @default(true)
+  links     FooterLink[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([visible, sortOrder])
+}
+
+model FooterLink {
+  id        String       @id @default(cuid())
+  columnId  String
+  column    FooterColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  href      String
+  label     String
+  sortOrder Int          @default(0)
+  visible   Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([columnId, sortOrder])
+  @@index([visible])
+}
+
+model Category {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String?
+  sortOrder   Int           @default(0)
+  status      PublishStatus @default(PUBLISHED)
+  services    Service[]
+  seoMeta     SeoMeta?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, sortOrder])
+}
+
+model Service {
+  id                  String           @id @default(cuid())
+  slug                String           @unique
+  title               String
+  categoryId          String
+  category            Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  headline            String
+  shortDescription    String
+  fullDescription     String
+  minPrice            Int
+  maxPrice            Int
+  duration            String
+  formats             String[]
+  documentType        String
+  documentDescription String
+  suitableFor         ServiceAudience[]
+  includes            ServiceInclude[]
+  benefits            ServiceBenefit[]
+  modules             ServiceModule[]
+  variants            ServiceVariant[]
+  faq                 ServiceFaq[]
+  documents           Document[]
+  seoMeta             SeoMeta?
+  keywords            String[]
+  synonyms            String[]
+  popularity          Int              @default(70)
+  accent              String           @default("blue")
+  sourceDocumentHref  String?
+  sourceDocumentLabel String?
+  status              PublishStatus    @default(PUBLISHED)
+  draftPayload        Json?
+  version             Int              @default(1)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([popularity])
+  @@index([minPrice])
+}
+
+model ServiceVariant {
+  id           String  @id @default(cuid())
+  serviceId    String
+  service      Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title        String
+  hours        Int
+  format       String
+  price        Int
+  paymentLabel String
+  sortOrder    Int     @default(0)
+
+  @@index([serviceId, sortOrder])
+}
+
+model ServiceFaq {
+  id        String  @id @default(cuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String
+  sortOrder Int     @default(0)
+
+  @@index([serviceId, sortOrder])
+}
+
+model ServiceModule {
+  id        String  @id @default(cuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title     String
+  sortOrder Int     @default(0)
+
+  @@index([serviceId, sortOrder])
+}
+
+model ServiceBenefit {
+  id        String  @id @default(cuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title     String
+  sortOrder Int     @default(0)
+
+  @@index([serviceId, sortOrder])
+}
+
+model ServiceInclude {
+  id        String  @id @default(cuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title     String
+  sortOrder Int     @default(0)
+
+  @@index([serviceId, sortOrder])
+}
+
+model ServiceAudience {
+  id        String  @id @default(cuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title     String
+  sortOrder Int     @default(0)
+
+  @@index([serviceId, sortOrder])
+}
+
+model Document {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  href        String
+  category    String        @default("Документы")
+  version     String?
+  visible     Boolean       @default(true)
+  status      PublishStatus @default(PUBLISHED)
+  serviceId   String?
+  service     Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([visible])
+  @@index([status])
+  @@index([serviceId])
+}
+
+model LegalPage {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String
+  content     String
+  status      PublishStatus @default(PUBLISHED)
+  version     Int           @default(1)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Lead {
+  id                  String       @id @default(cuid())
+  name                String
+  phone               String
+  email               String?
+  serviceId           String
+  serviceTitle        String
+  comment             String?
+  source              String       @default("website")
+  pagePath            String?
+  utmSource           String?
+  utmMedium           String?
+  utmCampaign         String?
+  preferredContact    String       @default("phone")
+  consentAccepted     Boolean      @default(true)
+  status              LeadStatus   @default(NEW)
+  priority            LeadPriority @default(NORMAL)
+  assignedTo          String?
+  managerNote         String?
+  rejectionReason     String?
+  deadlineAt          DateTime?
+  lastStatusChangedAt DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  events              LeadEvent[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([serviceId])
+  @@index([phone])
+}
+
+model LeadEvent {
+  id         String     @id @default(cuid())
+  leadId     String
+  lead       Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fromStatus LeadStatus?
+  toStatus   LeadStatus?
+  actorEmail String?
+  note       String?
+  createdAt  DateTime   @default(now())
+
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  actorEmail String?
+  entityId   String?
+  payload    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+}
+
+model SiteContent {
+  id                              String   @id @default("main")
+  heroEyebrow                     String
+  heroTitle                       String
+  heroDescription                 String
+  organizationTitle               String
+  organizationDescription         String
+  draftHeroEyebrow                String?
+  draftHeroTitle                  String?
+  draftHeroDescription            String?
+  draftOrganizationTitle          String?
+  draftOrganizationDescription    String?
+  lastPublishedAt                 DateTime?
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @updatedAt
+}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#eaf2ff"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="1">
+      <stop stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="985" cy="98" r="230" fill="#dbeafe" opacity="0.65"/>
+  <circle cx="105" cy="540" r="220" fill="#bfdbfe" opacity="0.28"/>
+  <rect x="72" y="72" width="1056" height="486" rx="36" fill="#ffffff" stroke="#dbe3ef"/>
+  <text x="112" y="158" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#1e3a8a">ЛИДЕР</text>
+  <text x="112" y="224" font-family="Georgia, serif" font-size="58" font-weight="700" fill="#0f172a">Профессиональное развитие</text>
+  <text x="112" y="294" font-family="Georgia, serif" font-size="58" font-weight="700" fill="#0f172a">для руководителей и организаций</text>
+  <text x="112" y="360" font-family="Arial, sans-serif" font-size="24" fill="#475569">Официальные программы, деловое сопровождение, документы установленного образца</text>
+  <rect x="112" y="420" width="270" height="62" rx="12" fill="url(#blue)"/>
+  <text x="150" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">ПОДОБРАТЬ ПРОГРАММУ</text>
+</svg>

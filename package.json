@@ -1,0 +1,63 @@
+{
+  "name": "mgipo-site-v8-27-footer-laptop-fix",
+  "version": "8.27.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "typecheck": "prisma generate && tsc --noEmit",
+    "lint": "eslint .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "verify": "npm run typecheck && npm run lint && npm run build",
+    "admin:hash": "tsx scripts/hash-admin-password.ts",
+    "db:deploy": "prisma migrate deploy",
+    "check:content": "tsx scripts/check-content.ts",
+    "setup:win": "powershell -ExecutionPolicy Bypass -File ./setup-windows.ps1",
+    "setup:local": "tsx scripts/setup-local.ts",
+    "verify:full": "npm run lint && npm run check:content && npm run test:unit && npm run test:e2e:smoke",
+    "test:unit": "tsx scripts/test-unit.ts",
+    "test:e2e:smoke": "tsx scripts/test-e2e-smoke.ts",
+    "test:a11y": "tsx scripts/test-a11y-static.ts",
+    "test:visual": "tsx scripts/test-visual-static.ts",
+    "analyze": "next build",
+    "doctor:admin": "tsx scripts/doctor-admin.ts",
+    "analyze:static": "node scripts/analyze-static-build.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.1",
+    "jose": "^6.0.12",
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.54.2",
+    "tailwind-merge": "^2.6.0",
+    "zod": "^3.24.1",
+    "@hookform/resolvers": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^16.0.0",
+    "postcss": "^8.4.49",
+    "prisma": "6.19.3",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
